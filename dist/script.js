@@ -430,7 +430,7 @@ articleForm.addEventListener("submit", (event) => {
         author,
         ownerCode: ownerCodeInput.value.trim(),
         title,
-        topic: requiredElement("#article-topic").value,
+        topic: "Other",
         body,
         photo: selectedPhoto,
         createdAt: formatDate(),
