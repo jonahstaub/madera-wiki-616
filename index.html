@@ -43,7 +43,7 @@
           </nav>
         </header>
 
-        <section class="rules-band" aria-labelledby="rules-title">
+        <section id="rules-section" class="rules-band" aria-labelledby="rules-title">
           <div>
             <p class="eyebrow">Home Page</p>
             <h2 id="rules-title">Read everything here if you are an editor and are new.</h2>
@@ -71,7 +71,7 @@
           </div>
         </section>
 
-        <section class="featured-band" aria-label="Featured topics and updates">
+        <section id="featured-section" class="featured-band" aria-label="Featured topics and updates">
           <article>
             <p class="eyebrow">Do Not Change</p>
             <h2>Featured Topics</h2>
@@ -88,9 +88,32 @@
           </article>
         </section>
 
-        <section class="content-grid">
-          <article class="composer-panel" aria-labelledby="article-form-title">
-            <h2 id="article-form-title">Post an article</h2>
+        <section id="articles-section" class="content-grid">
+          <section class="articles-panel" aria-labelledby="articles-title">
+            <div class="panel-heading">
+              <h2 id="articles-title">Class articles</h2>
+              <button id="make-article-button" class="text-button" type="button">Make article</button>
+            </div>
+            <label class="search-label" for="article-search">
+              Search topics
+              <input id="article-search" type="search" placeholder="Search by title, author, or topic" />
+            </label>
+            <p id="article-results-note" class="results-note">Search or click a topic to read articles.</p>
+            <div id="articles-list" class="articles-list"></div>
+          </section>
+
+          <aside class="index-panel" aria-labelledby="index-title">
+            <h2 id="index-title">Topic index</h2>
+            <div id="topic-index" class="topic-index"></div>
+          </aside>
+        </section>
+
+        <section id="article-create-page" class="article-create-page hidden" aria-labelledby="article-form-title">
+          <article class="composer-panel">
+            <div class="panel-heading">
+              <h2 id="article-form-title">Make article</h2>
+              <button id="cancel-article-button" class="text-button" type="button">Back</button>
+            </div>
             <form id="article-form" class="stacked-form">
               <label>
                 Your name
@@ -106,7 +129,7 @@
               </label>
               <label>
                 Article
-                <textarea id="article-body" rows="8" maxlength="1800" required></textarea>
+                <textarea id="article-body" rows="12" maxlength="1800" required></textarea>
               </label>
               <label>
                 Photo
@@ -117,23 +140,6 @@
               <button type="submit">Publish</button>
             </form>
           </article>
-
-          <section class="articles-panel" aria-labelledby="articles-title">
-            <div class="panel-heading">
-              <h2 id="articles-title">Class articles</h2>
-            </div>
-            <label class="search-label" for="article-search">
-              Search topics
-              <input id="article-search" type="search" placeholder="Search by title, author, or topic" />
-            </label>
-            <p id="article-results-note" class="results-note">Search or click a topic to read articles.</p>
-            <div id="articles-list" class="articles-list"></div>
-          </section>
-
-          <aside class="index-panel" aria-labelledby="index-title">
-            <h2 id="index-title">Topic index</h2>
-            <div id="topic-index" class="topic-index"></div>
-          </aside>
         </section>
       </section>
     </main>

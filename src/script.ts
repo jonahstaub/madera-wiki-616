@@ -34,6 +34,12 @@ const loginForm = requiredElement<HTMLFormElement>("#login-form");
 const loginError = requiredElement<HTMLElement>("#login-error");
 const passwordInput = requiredElement<HTMLInputElement>("#password");
 const lockButton = requiredElement<HTMLButtonElement>("#lock-button");
+const rulesSection = requiredElement<HTMLElement>("#rules-section");
+const featuredSection = requiredElement<HTMLElement>("#featured-section");
+const articlesSection = requiredElement<HTMLElement>("#articles-section");
+const articleCreatePage = requiredElement<HTMLElement>("#article-create-page");
+const makeArticleButton = requiredElement<HTMLButtonElement>("#make-article-button");
+const cancelArticleButton = requiredElement<HTMLButtonElement>("#cancel-article-button");
 const adminForm = requiredElement<HTMLFormElement>("#admin-form");
 const adminCodeInput = requiredElement<HTMLInputElement>("#admin-code");
 const adminStatus = requiredElement<HTMLElement>("#admin-status");
@@ -169,6 +175,7 @@ function escapeHtml(value: string): string {
 function showWiki(): void {
   loginScreen.classList.add("hidden");
   wikiScreen.classList.remove("hidden");
+  showArticleHome();
   renderFeaturedTopics();
   renderArticles();
   renderTopicIndex();
@@ -178,6 +185,21 @@ function showLogin(): void {
   wikiScreen.classList.add("hidden");
   loginScreen.classList.remove("hidden");
   passwordInput.focus();
+}
+
+function showArticleHome(): void {
+  rulesSection.classList.remove("hidden");
+  featuredSection.classList.remove("hidden");
+  articlesSection.classList.remove("hidden");
+  articleCreatePage.classList.add("hidden");
+}
+
+function showArticleCreatePage(): void {
+  rulesSection.classList.add("hidden");
+  featuredSection.classList.add("hidden");
+  articlesSection.classList.add("hidden");
+  articleCreatePage.classList.remove("hidden");
+  requiredElement<HTMLInputElement>("#article-author").focus();
 }
 
 function formatDate(): string {
@@ -480,6 +502,14 @@ lockButton.addEventListener("click", () => {
   showLogin();
 });
 
+makeArticleButton.addEventListener("click", () => {
+  showArticleCreatePage();
+});
+
+cancelArticleButton.addEventListener("click", () => {
+  showArticleHome();
+});
+
 articleForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -517,6 +547,7 @@ articleForm.addEventListener("submit", (event) => {
   articleForm.querySelector<HTMLButtonElement>("button[type='submit']")!.textContent = "Publish";
   articleSearchInput.value = article.title;
   currentSearch = article.title;
+  showArticleHome();
   renderArticles();
   renderTopicIndex();
 });

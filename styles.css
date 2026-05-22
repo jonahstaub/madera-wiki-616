@@ -176,7 +176,8 @@ textarea {
 .site-header,
 .rules-band,
 .featured-band,
-.content-grid {
+.content-grid,
+.article-create-page {
   width: min(1220px, 100%);
   margin: 0 auto;
 }
@@ -328,10 +329,21 @@ textarea {
 
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(270px, 0.75fr) minmax(360px, 1.45fr) minmax(240px, 0.65fr);
+  grid-template-columns: minmax(360px, 1.45fr) minmax(240px, 0.65fr);
   gap: 0.7rem;
   min-height: 0;
   padding: 0.55rem 0 0;
+}
+
+.article-create-page {
+  min-height: 0;
+  padding: 0.8rem 0 0;
+  overflow: auto;
+}
+
+.article-create-page .composer-panel {
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .texting-layout {
@@ -612,6 +624,7 @@ textarea {
   .rules-band,
   .featured-band,
   .content-grid,
+  .article-create-page,
   .texting-layout {
     grid-template-columns: 1fr;
   }
