@@ -1,3 +1,5 @@
+import { hasBadLanguage } from "./content-filter.js";
+
 const CHAT_PASSWORD = "madera";
 const CHAT_STORAGE_KEYS = {
   unlocked: "maderaWikiUnlocked",
@@ -20,6 +22,19 @@ const chatLoginError = requiredChatElement<HTMLElement>("#chat-login-error");
 const chatLockButton = requiredChatElement<HTMLButtonElement>("#chat-lock-button");
 const messageForm = requiredChatElement<HTMLFormElement>("#message-form");
 const messagesList = requiredChatElement<HTMLElement>("#messages-list");
+const messageError = requiredChatElement<HTMLElement>("#message-error");
+const messageSyncRef = getFirebaseReference("schoolWiki/messages");
+let applyingRemoteMessages = false;
+
+function getFirebaseReference(path: string): FirebaseCompatReference | null {
+  if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG) return null;
+
+  if (window.firebase.apps.length === 0) {
+    window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
+  }
+
+  return window.firebase.database().ref(path);
+}
 
 function getMessages(): SchoolWikiMessage[] {
   const saved = localStorage.getItem(CHAT_STORAGE_KEYS.messages);
@@ -34,6 +49,43 @@ function getMessages(): SchoolWikiMessage[] {
 
 function saveMessages(messages: SchoolWikiMessage[]): void {
   localStorage.setItem(CHAT_STORAGE_KEYS.messages, JSON.stringify(messages));
+}
+
+function persistMessages(messages: SchoolWikiMessage[]): void {
+  saveMessages(messages);
+
+  if (messageSyncRef && !applyingRemoteMessages) {
+    void messageSyncRef.set(messages);
+  }
+}
+
+function initializeMessageSync(): void {
+  if (!messageSyncRef) return;
+
+  messageSyncRef
+    .once("value")
+    .then((snapshot) => {
+      const remoteMessages = snapshot.val();
+
+      if (Array.isArray(remoteMessages)) {
+        saveMessages(remoteMessages as SchoolWikiMessage[]);
+        renderMessages();
+        return;
+      }
+
+      void messageSyncRef.set(getMessages());
+    })
+    .catch(() => undefined);
+
+  messageSyncRef.on("value", (snapshot) => {
+    const remoteMessages = snapshot.val();
+    if (!Array.isArray(remoteMessages)) return;
+
+    applyingRemoteMessages = true;
+    saveMessages(remoteMessages as SchoolWikiMessage[]);
+    applyingRemoteMessages = false;
+    renderMessages();
+  });
 }
 
 function escapeChatHtml(value: string): string {
@@ -114,16 +166,27 @@ chatLockButton.addEventListener("click", () => {
 messageForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  const author = requiredChatElement<HTMLInputElement>("#message-author").value.trim();
+  const body = requiredChatElement<HTMLTextAreaElement>("#message-body").value.trim();
+
+  if (hasBadLanguage(`${author} ${body}`)) {
+    messageError.textContent = "Please remove bad language before sending.";
+    return;
+  }
+  messageError.textContent = "";
+
   const message: SchoolWikiMessage = {
-    author: requiredChatElement<HTMLInputElement>("#message-author").value.trim(),
-    body: requiredChatElement<HTMLTextAreaElement>("#message-body").value.trim(),
+    author,
+    body,
     createdAt: formatChatDate(),
   };
 
-  saveMessages([...getMessages(), message].slice(-100));
+  persistMessages([...getMessages(), message].slice(-100));
   requiredChatElement<HTMLTextAreaElement>("#message-body").value = "";
   renderMessages();
 });
+
+initializeMessageSync();
 
 if (localStorage.getItem(CHAT_STORAGE_KEYS.unlocked) === "true") {
   showTexting();

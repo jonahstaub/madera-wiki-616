@@ -1,4 +1,4 @@
-const SCHOOL_WIKI_VERSION = "2026-05-22-school-import-1";
+const SCHOOL_WIKI_VERSION = "2026-05-22-school-import-3";
 
 const FEATURED_TOPICS = [
   "Antimatter",
@@ -53,12 +53,6 @@ const IMPORTED_ARTICLES = [
     author: "Keiden",
     topic: "Animals",
     body: "Coleoids are a subclass of cephalopods consisting of Octopodiformes and Decopodiformes. The tab starts sections for octopods, Cirrata, Incirrata, and decopods. Cirrate octopuses include flapjack devilfish and dumbo octopuses.\n\nSources used section needed.",
-  },
-  {
-    title: "Cow",
-    author: "Reserved",
-    topic: "Animals",
-    body: "There does not seem to be anything here. Please edit and provide a sources used section to help out the school wiki.",
   },
   {
     title: "Dance",
@@ -121,12 +115,6 @@ const IMPORTED_ARTICLES = [
     body: "Io is one of Jupiter's moons and one of the most volcanically active worlds known. Its volcanoes are powered by tidal forces from Jupiter and its elliptical orbit, which stretch and compress the moon. NASA's Juno mission has studied Io.\n\nFor more information:\nhttps://science.nasa.gov/jupiter/jupiter-moons/io/",
   },
   {
-    title: "Light Waves",
-    author: "Ari",
-    topic: "Science",
-    body: "This tab is in progress. The original note says: IM ADDING STUFF HERE CHILL.\n\nSources used section needed.",
-  },
-  {
     title: "Magic the Gathering",
     author: "Jonah Staub",
     topic: "Games",
@@ -143,18 +131,6 @@ const IMPORTED_ARTICLES = [
     author: "Imported class article",
     topic: "Food",
     body: "McDonald's is a fast food chain found around the world. It is famous for burgers like the Big Mac and is one of the most popular fast food chains in the world.\n\nSources used section needed.",
-  },
-  {
-    title: "Naked Mole Rat",
-    author: "Reserved",
-    topic: "Animals",
-    body: "There does not seem to be anything here. Please edit and provide a sources used section to help out the school wiki.",
-  },
-  {
-    title: "Peanut Butter",
-    author: "Reserved",
-    topic: "Food",
-    body: "There does not seem to be anything here. Please edit and provide a sources used section to help out the school wiki.",
   },
   {
     title: "Phillies",
@@ -193,28 +169,10 @@ const IMPORTED_ARTICLES = [
     body: "A class list of favorite rappers and rap groups, including E-40, 2Pac, MF DOOM, Snoop Dogg, Outkast, Fugees, Jay-Z, Mac Dre, Nas, Eminem, Dr. Dre, N.W.A., A Tribe Called Quest, Sugar Hill Gang, Drake, and others.\n\nSources used section needed.",
   },
   {
-    title: "Sabrina Carpenter",
-    author: "Josie Kathrine Lemontt",
-    topic: "Music",
-    body: "This tab is reserved for a Sabrina Carpenter article and needs more information and sources.\n\nSources used section needed.",
-  },
-  {
-    title: "Secrets of Strixhaven",
-    author: "Imported class article",
-    topic: "Games",
-    body: "Secrets of Strixhaven is an MTG set taking place in a world where the article is still being written.\n\nSources used section needed.",
-  },
-  {
     title: "Snails",
     author: "Lyona Davis",
     topic: "Animals",
     body: "A snail is a shelled gastropod. The term can apply to land snails, sea snails, and freshwater snails. Some aquatic snails can live in freshwater or salt water. Water snails lay eggs through a reproductive organ under their shell and often coat eggs in protective jelly-like slime.\n\nSuggested sources from tab: University of Florida Freshwater Snails of Florida ID Guide; Montana Field Guide for Aquatic Snails.",
-  },
-  {
-    title: "Snakes",
-    author: "Tavi",
-    topic: "Animals",
-    body: "There does not seem to be anything here. Please edit and provide a sources used section to help out the school wiki.",
   },
   {
     title: "Space Sounds",
@@ -247,58 +205,40 @@ const IMPORTED_ARTICLES = [
     body: "This article explains the word 'stuff' as one of English's most flexible placeholder words. It covers its Old French and Old High German roots, medieval meanings, later uses for materials and supplies, Shakespeare's 'sterner stuff,' modern idioms like 'know one's stuff' and 'the right stuff,' and its use as a noun and verb.\n\nSources used section needed.",
   },
   {
-    title: "The Dancing Plague of 1518",
+    title: "Dancing Plague of 1518",
     author: "Imported class article",
     topic: "History",
     body: "The dancing plague of 1518 began in Strasbourg when Frau Troffea reportedly started dancing uncontrollably in the street. Others joined, and by August between 50 and 400 people were said to be affected. Some dancers collapsed.\n\nSources used section needed.",
   },
   {
-    title: "The History of Minecraft",
+    title: "History of Minecraft",
     author: "Aylan",
     topic: "Games",
     body: "Minecraft is a popular game released in 2011. The tab mentions early access, early players, rapid popularity, and awards.\n\nSources used section needed.",
   },
   {
-    title: "The History of Roblox",
-    author: "Wyatt Keller Mih and Mazen Hazen",
-    topic: "Games",
-    body: "This tab is reserved for a Roblox history article. The original note says Mazen reserved it and gave Wyatt permission to work on it.\n\nSources used section needed.",
-  },
-  {
-    title: "The History of YessirPlayz",
+    title: "History of YessirPlayz",
     author: "Wyatt Keller Mih, narrated by Derp",
     topic: "Games",
     body: "This article investigates the YouTuber YessirPlayz, a Roblox creator who started in 2020, grew during 2025 with frequent shorts, focused on Grow a Garden videos, then appeared to pause or vanish around April 2026. The article describes searching for old videos and trying to piece together the creator's history.\n\nSources used section needed.",
   },
   {
-    title: "The Hobbit",
+    title: "Hobbit",
     author: "Imported class article",
     topic: "Books",
     body: "The Hobbit is a book by J.R.R. Tolkien about Bilbo Baggins from Hobbiton. He goes on a journey involving the dragon Smaug.\n\nSources used section needed.",
   },
   {
-    title: "The Paralysis Plague",
+    title: "Paralysis Plague",
     author: "Roshan Zieminski",
     topic: "Science",
     body: "This article describes a strange historical plague that supposedly causes long-term paralysis and a coma-like state before a brief final period of awareness. It needs sources and verification.\n\nSources used section needed.",
   },
   {
-    title: "The Red Baron",
+    title: "Red Baron",
     author: "Aylan Sisalem",
     topic: "History",
     body: "The Red Baron was a German World War I pilot credited with 80 aerial victories. The article describes his final dogfight in 1918, the debate over who shot him down, museum pieces from his plane, and the Red Baron in Snoopy comics.\n\nSources used section needed.",
-  },
-  {
-    title: "The Taos Hum",
-    author: "Reserved",
-    topic: "Science",
-    body: "There does not seem to be anything here. Please edit and provide a sources used section to help out the school wiki.",
-  },
-  {
-    title: "The Timeline of Hip-Hop",
-    author: "Marcus Vaca Mandujano",
-    topic: "Music",
-    body: "This page is reserved for a timeline of hip-hop.\n\nSources used section needed.",
   },
   {
     title: "Tritera",

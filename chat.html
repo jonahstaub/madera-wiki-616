@@ -55,6 +55,7 @@
                 Message
                 <textarea id="message-body" rows="5" maxlength="500" required></textarea>
               </label>
+              <p id="message-error" class="form-note" role="alert"></p>
               <button type="submit">Send</button>
             </form>
           </aside>
@@ -62,6 +63,9 @@
       </section>
     </main>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script type="module" src="dist/chat.js"></script>
   </body>
 </html>

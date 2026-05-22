@@ -1,3 +1,4 @@
+import { filterBadLanguage, hasBadLanguage } from "./content-filter.js";
 const PASSWORD = "madera";
 const MASTER_OWNER_CODE = "MILLER RULES";
 const MAX_PHOTO_SIZE = 1.5 * 1024 * 1024;
@@ -39,6 +40,16 @@ const articleBodyInput = requiredElement("#article-body");
 let selectedPhoto = null;
 let currentSearch = "";
 let adminUnlocked = false;
+const articleSyncRef = getFirebaseReference("schoolWiki/articles");
+let applyingRemoteArticles = false;
+function getFirebaseReference(path) {
+    if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG)
+        return null;
+    if (window.firebase.apps.length === 0) {
+        window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
+    }
+    return window.firebase.database().ref(path);
+}
 function initializeSeedData() {
     const existingVersion = localStorage.getItem(STORAGE_KEYS.seedVersion);
     const existingArticles = localStorage.getItem(STORAGE_KEYS.articles);
@@ -68,6 +79,42 @@ function saveItems(key, items) {
     catch {
         return false;
     }
+}
+function persistArticles(articles) {
+    const saved = saveItems(STORAGE_KEYS.articles, articles);
+    if (!saved)
+        return false;
+    if (articleSyncRef && !applyingRemoteArticles) {
+        void articleSyncRef.set(articles);
+    }
+    return true;
+}
+function initializeArticleSync() {
+    if (!articleSyncRef)
+        return;
+    articleSyncRef
+        .once("value")
+        .then((snapshot) => {
+        const remoteArticles = snapshot.val();
+        if (Array.isArray(remoteArticles) && remoteArticles.length > 0) {
+            saveItems(STORAGE_KEYS.articles, normalizeArticles(remoteArticles));
+            renderArticles();
+            renderTopicIndex();
+            return;
+        }
+        void articleSyncRef.set(normalizeArticles(getItems(STORAGE_KEYS.articles, importedArticles)));
+    })
+        .catch(() => undefined);
+    articleSyncRef.on("value", (snapshot) => {
+        const remoteArticles = snapshot.val();
+        if (!Array.isArray(remoteArticles))
+            return;
+        applyingRemoteArticles = true;
+        saveItems(STORAGE_KEYS.articles, normalizeArticles(remoteArticles));
+        applyingRemoteArticles = false;
+        renderArticles();
+        renderTopicIndex();
+    });
 }
 function escapeHtml(value) {
     return value.replace(/[&<>"']/g, (character) => {
@@ -253,9 +300,15 @@ function saveInlineEdit(textarea) {
     const articleId = textarea.dataset.articleId;
     if (!articleId)
         return;
-    const nextBody = textarea.value.trimEnd();
+    const filteredValue = filterBadLanguage(textarea.value);
+    if (filteredValue !== textarea.value) {
+        textarea.value = filteredValue;
+        textarea.selectionStart = textarea.value.length;
+        textarea.selectionEnd = textarea.value.length;
+    }
+    const nextBody = filteredValue.trimEnd();
     const articles = normalizeArticles(getItems(STORAGE_KEYS.articles, importedArticles));
-    saveItems(STORAGE_KEYS.articles, articles.map((article) => (article.id === articleId ? { ...article, body: nextBody } : article)));
+    persistArticles(articles.map((article) => (article.id === articleId ? { ...article, body: nextBody } : article)));
 }
 async function saveInlinePhoto(input) {
     const articleId = input.dataset.articleId;
@@ -279,7 +332,7 @@ async function saveInlinePhoto(input) {
     try {
         const photo = await readPhoto(file);
         const articles = normalizeArticles(getItems(STORAGE_KEYS.articles, importedArticles));
-        saveItems(STORAGE_KEYS.articles, articles.map((article) => (article.id === articleId ? { ...article, photo } : article)));
+        persistArticles(articles.map((article) => (article.id === articleId ? { ...article, photo } : article)));
         renderArticles();
     }
     catch (error) {
@@ -355,19 +408,26 @@ lockButton.addEventListener("click", () => {
 });
 articleForm.addEventListener("submit", (event) => {
     event.preventDefault();
+    const author = requiredElement("#article-author").value.trim();
+    const title = requiredElement("#article-title").value.trim();
+    const body = articleBodyInput.value.trim();
+    if (hasBadLanguage(`${author} ${title} ${body}`)) {
+        photoError.textContent = "Please remove bad language before publishing.";
+        return;
+    }
     const article = {
         id: `article-${Date.now()}`,
-        author: requiredElement("#article-author").value.trim(),
+        author,
         ownerCode: ownerCodeInput.value.trim(),
-        title: requiredElement("#article-title").value.trim(),
+        title,
         topic: requiredElement("#article-topic").value,
-        body: articleBodyInput.value.trim(),
+        body,
         photo: selectedPhoto,
         createdAt: formatDate(),
         additions: [],
     };
     const articles = normalizeArticles(getItems(STORAGE_KEYS.articles, importedArticles));
-    const saved = saveItems(STORAGE_KEYS.articles, [article, ...articles]);
+    const saved = persistArticles([article, ...articles]);
     if (!saved) {
         photoError.textContent = "This post is too large to save. Try a smaller photo.";
         return;
@@ -473,10 +533,10 @@ articlesList.addEventListener("paste", (event) => {
     }
 });
 initializeSeedData();
+initializeArticleSync();
 if (localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
     showWiki();
 }
 else {
     showLogin();
 }
-export {};
