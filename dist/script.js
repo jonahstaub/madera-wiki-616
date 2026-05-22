@@ -15,7 +15,7 @@ function requiredElement(selector) {
     return element;
 }
 const importedArticles = (window.IMPORTED_ARTICLES || []).map((article) => normalizeArticle({ ...article, createdAt: "Imported" }, 0));
-const featuredTopics = window.FEATURED_TOPICS || [];
+const featuredTopics = (window.FEATURED_TOPICS || []).map(cleanArticleTitle).sort(compareTitles);
 const seedVersion = window.SCHOOL_WIKI_VERSION || "default";
 const loginScreen = requiredElement("#login-screen");
 const wikiScreen = requiredElement("#wiki-screen");
@@ -60,6 +60,15 @@ function initializeSeedData() {
     }
     saveItems(STORAGE_KEYS.articles, normalizeArticles(getItems(STORAGE_KEYS.articles, importedArticles)));
 }
+function cleanArticleTitle(title) {
+    return title.trim().replace(/^the\s+/i, "");
+}
+function compareTitles(first, second) {
+    return first.localeCompare(second, undefined, { sensitivity: "base" });
+}
+function compareArticles(first, second) {
+    return compareTitles(first.title, second.title);
+}
 function getItems(key, fallback) {
     const saved = localStorage.getItem(key);
     if (!saved)
@@ -81,11 +90,12 @@ function saveItems(key, items) {
     }
 }
 function persistArticles(articles) {
-    const saved = saveItems(STORAGE_KEYS.articles, articles);
+    const normalizedArticles = normalizeArticles(articles);
+    const saved = saveItems(STORAGE_KEYS.articles, normalizedArticles);
     if (!saved)
         return false;
     if (articleSyncRef && !applyingRemoteArticles) {
-        void articleSyncRef.set(articles);
+        void articleSyncRef.set(normalizedArticles);
     }
     return true;
 }
@@ -182,15 +192,15 @@ function renderArticles() {
     });
 }
 function normalizeArticles(articles) {
-    return articles.map((article, index) => normalizeArticle(article, index));
+    return articles.map((article, index) => normalizeArticle(article, index)).sort(compareArticles);
 }
 function normalizeArticle(article, index) {
     return {
         id: article.id || makeArticleId(article.title, index),
         author: article.author,
         ownerCode: article.ownerCode || "",
-        title: article.title,
-        topic: article.topic,
+        title: cleanArticleTitle(article.title),
+        topic: article.topic.trim(),
         body: mergeAdditionsIntoBody(article),
         photo: article.photo || null,
         createdAt: article.createdAt || formatDate(),
@@ -206,7 +216,7 @@ function mergeAdditionsIntoBody(article) {
     return `${article.body}\n\n${additionsText}`;
 }
 function makeArticleId(title, index) {
-    return `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${index}`;
+    return `${cleanArticleTitle(title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${index}`;
 }
 function filterArticles(articles) {
     const query = currentSearch.trim().toLowerCase();
@@ -234,7 +244,7 @@ function renderTopicIndex() {
     topicIndex.innerHTML = "";
     articles
         .map((article) => article.title)
-        .sort((a, b) => a.localeCompare(b))
+        .sort(compareTitles)
         .forEach((title) => {
         const button = document.createElement("button");
         button.className = "index-link";
@@ -409,7 +419,7 @@ lockButton.addEventListener("click", () => {
 articleForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const author = requiredElement("#article-author").value.trim();
-    const title = requiredElement("#article-title").value.trim();
+    const title = cleanArticleTitle(requiredElement("#article-title").value);
     const body = articleBodyInput.value.trim();
     if (hasBadLanguage(`${author} ${title} ${body}`)) {
         photoError.textContent = "Please remove bad language before publishing.";

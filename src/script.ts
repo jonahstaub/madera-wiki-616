@@ -25,7 +25,7 @@ function requiredElement<T extends HTMLElement>(selector: string): T {
 const importedArticles: Article[] = (window.IMPORTED_ARTICLES || []).map((article) =>
   normalizeArticle({ ...article, createdAt: "Imported" }, 0),
 );
-const featuredTopics = window.FEATURED_TOPICS || [];
+const featuredTopics = (window.FEATURED_TOPICS || []).map(cleanArticleTitle).sort(compareTitles);
 const seedVersion = window.SCHOOL_WIKI_VERSION || "default";
 
 const loginScreen = requiredElement<HTMLElement>("#login-screen");
@@ -78,6 +78,18 @@ function initializeSeedData(): void {
   saveItems(STORAGE_KEYS.articles, normalizeArticles(getItems(STORAGE_KEYS.articles, importedArticles)));
 }
 
+function cleanArticleTitle(title: string): string {
+  return title.trim().replace(/^the\s+/i, "");
+}
+
+function compareTitles(first: string, second: string): number {
+  return first.localeCompare(second, undefined, { sensitivity: "base" });
+}
+
+function compareArticles(first: Article, second: Article): number {
+  return compareTitles(first.title, second.title);
+}
+
 function getItems<T>(key: string, fallback: T): T {
   const saved = localStorage.getItem(key);
   if (!saved) return fallback;
@@ -99,11 +111,12 @@ function saveItems(key: string, items: unknown): boolean {
 }
 
 function persistArticles(articles: Article[]): boolean {
-  const saved = saveItems(STORAGE_KEYS.articles, articles);
+  const normalizedArticles = normalizeArticles(articles);
+  const saved = saveItems(STORAGE_KEYS.articles, normalizedArticles);
   if (!saved) return false;
 
   if (articleSyncRef && !applyingRemoteArticles) {
-    void articleSyncRef.set(articles);
+    void articleSyncRef.set(normalizedArticles);
   }
 
   return true;
@@ -215,7 +228,7 @@ function renderArticles(): void {
 }
 
 function normalizeArticles(articles: SchoolWikiArticle[]): Article[] {
-  return articles.map((article, index) => normalizeArticle(article, index));
+  return articles.map((article, index) => normalizeArticle(article, index)).sort(compareArticles);
 }
 
 function normalizeArticle(article: SchoolWikiArticle, index: number): Article {
@@ -223,8 +236,8 @@ function normalizeArticle(article: SchoolWikiArticle, index: number): Article {
     id: article.id || makeArticleId(article.title, index),
     author: article.author,
     ownerCode: article.ownerCode || "",
-    title: article.title,
-    topic: article.topic,
+    title: cleanArticleTitle(article.title),
+    topic: article.topic.trim(),
     body: mergeAdditionsIntoBody(article),
     photo: article.photo || null,
     createdAt: article.createdAt || formatDate(),
@@ -243,7 +256,7 @@ function mergeAdditionsIntoBody(article: SchoolWikiArticle): string {
 }
 
 function makeArticleId(title: string, index: number): string {
-  return `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${index}`;
+  return `${cleanArticleTitle(title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${index}`;
 }
 
 function filterArticles(articles: Article[]): Article[] {
@@ -277,7 +290,7 @@ function renderTopicIndex(): void {
 
   articles
     .map((article) => article.title)
-    .sort((a, b) => a.localeCompare(b))
+    .sort(compareTitles)
     .forEach((title) => {
       const button = document.createElement("button");
       button.className = "index-link";
@@ -471,7 +484,7 @@ articleForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const author = requiredElement<HTMLInputElement>("#article-author").value.trim();
-  const title = requiredElement<HTMLInputElement>("#article-title").value.trim();
+  const title = cleanArticleTitle(requiredElement<HTMLInputElement>("#article-title").value);
   const body = articleBodyInput.value.trim();
 
   if (hasBadLanguage(`${author} ${title} ${body}`)) {

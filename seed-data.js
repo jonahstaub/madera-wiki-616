@@ -1,14 +1,14 @@
-const SCHOOL_WIKI_VERSION = "2026-05-22-school-import-3";
+const SCHOOL_WIKI_VERSION = "2026-05-22-school-import-4";
 
 const FEATURED_TOPICS = [
   "Antimatter",
-  "Quantum States",
-  "Pokemon",
-  "The Red Baron",
-  "Project Hail Mary",
   "Green Day",
-  "Magic the Gathering",
   "How to make a McDonald's cheeseburger",
+  "Magic the Gathering",
+  "Pokemon",
+  "Project Hail Mary",
+  "Quantum States",
+  "Red Baron",
 ];
 
 const IMPORTED_ARTICLES = [
@@ -61,6 +61,12 @@ const IMPORTED_ARTICLES = [
     body: "Dance has existed for thousands of years across many cultures. It is also a strong workout. Styles include ballet, hip-hop, jazz, pointe, tap, modern, lyrical, contemporary, and breakdancing. Pointe is a classical technique where dancers support their body weight on the tips of reinforced pointe shoes after strengthening their feet.\n\nSources used section needed.",
   },
   {
+    title: "Dancing Plague of 1518",
+    author: "Imported class article",
+    topic: "History",
+    body: "The dancing plague of 1518 began in Strasbourg when Frau Troffea reportedly started dancing uncontrollably in the street. Others joined, and by August between 50 and 400 people were said to be affected. Some dancers collapsed.\n\nSources used section needed.",
+  },
+  {
     title: "Dogs",
     author: "Imported class article",
     topic: "Animals",
@@ -97,16 +103,34 @@ const IMPORTED_ARTICLES = [
     body: "Green Day is an American punk rock band formed in 1987 in Rodeo, California. The main trio is Billie Joe Armstrong, Mike Dirnt, and Tre Cool. They became famous with Dookie in 1994 and reinforced their status with American Idiot in 2004.\n\nSources:\nWikipedia.org",
   },
   {
-    title: "How to make McDonald's chicken nuggets",
-    author: "Talon",
-    topic: "Food",
-    body: "This recipe uses ground chicken, egg, salt, pepper, cornstarch, flour, onion powder, garlic powder, cold club soda, and frying oil. Blend the chicken into a paste, shape nuggets, coat with cornstarch, freeze briefly, dip in tempura batter, fry at 350F, and cook to 165F internal temperature.\n\nSources used section needed.",
+    title: "History of Minecraft",
+    author: "Aylan",
+    topic: "Games",
+    body: "Minecraft is a popular game released in 2011. The tab mentions early access, early players, rapid popularity, and awards.\n\nSources used section needed.",
+  },
+  {
+    title: "History of YessirPlayz",
+    author: "Wyatt Keller Mih, narrated by Derp",
+    topic: "Games",
+    body: "This article investigates the YouTuber YessirPlayz, a Roblox creator who started in 2020, grew during 2025 with frequent shorts, focused on Grow a Garden videos, then appeared to pause or vanish around April 2026. The article describes searching for old videos and trying to piece together the creator's history.\n\nSources used section needed.",
+  },
+  {
+    title: "Hobbit",
+    author: "Imported class article",
+    topic: "Books",
+    body: "The Hobbit is a book by J.R.R. Tolkien about Bilbo Baggins from Hobbiton. He goes on a journey involving the dragon Smaug.\n\nSources used section needed.",
   },
   {
     title: "How to make a McDonald's cheeseburger",
     author: "Louie",
     topic: "Food",
     body: "The cheeseburger tab explains how to make a homemade copycat cheeseburger with thin 80/20 beef patties, buns, ketchup, mustard, minced onions, pickles, and American cheese. The patty mix uses ground beef, bread crumbs, egg, salt, and pepper. The original pasted recipe also included prep/cook times and assembly steps.\n\nSources used section needed.",
+  },
+  {
+    title: "How to make McDonald's chicken nuggets",
+    author: "Talon",
+    topic: "Food",
+    body: "This recipe uses ground chicken, egg, salt, pepper, cornstarch, flour, onion powder, garlic powder, cold club soda, and frying oil. Blend the chicken into a paste, shape nuggets, coat with cornstarch, freeze briefly, dip in tempura batter, fry at 350F, and cook to 165F internal temperature.\n\nSources used section needed.",
   },
   {
     title: "Io",
@@ -131,6 +155,18 @@ const IMPORTED_ARTICLES = [
     author: "Imported class article",
     topic: "Food",
     body: "McDonald's is a fast food chain found around the world. It is famous for burgers like the Big Mac and is one of the most popular fast food chains in the world.\n\nSources used section needed.",
+  },
+  {
+    title: "Mythical Animals and Items",
+    author: "Alex",
+    topic: "Mythology",
+    body: "This page starts a topic about mythical animals and magic items. It mentions jade as a protective stone associated with luck and centaurs as half-human, half-horse beings who may be hunters, warriors, or wise figures.\n\nSources used section needed.",
+  },
+  {
+    title: "Paralysis Plague",
+    author: "Roshan Zieminski",
+    topic: "Science",
+    body: "This article describes a strange historical plague that supposedly causes long-term paralysis and a coma-like state before a brief final period of awareness. It needs sources and verification.\n\nSources used section needed.",
   },
   {
     title: "Phillies",
@@ -169,6 +205,12 @@ const IMPORTED_ARTICLES = [
     body: "A class list of favorite rappers and rap groups, including E-40, 2Pac, MF DOOM, Snoop Dogg, Outkast, Fugees, Jay-Z, Mac Dre, Nas, Eminem, Dr. Dre, N.W.A., A Tribe Called Quest, Sugar Hill Gang, Drake, and others.\n\nSources used section needed.",
   },
   {
+    title: "Red Baron",
+    author: "Aylan Sisalem",
+    topic: "History",
+    body: "The Red Baron was a German World War I pilot credited with 80 aerial victories. The article describes his final dogfight in 1918, the debate over who shot him down, museum pieces from his plane, and the Red Baron in Snoopy comics.\n\nSources used section needed.",
+  },
+  {
     title: "Snails",
     author: "Lyona Davis",
     topic: "Animals",
@@ -205,42 +247,6 @@ const IMPORTED_ARTICLES = [
     body: "This article explains the word 'stuff' as one of English's most flexible placeholder words. It covers its Old French and Old High German roots, medieval meanings, later uses for materials and supplies, Shakespeare's 'sterner stuff,' modern idioms like 'know one's stuff' and 'the right stuff,' and its use as a noun and verb.\n\nSources used section needed.",
   },
   {
-    title: "Dancing Plague of 1518",
-    author: "Imported class article",
-    topic: "History",
-    body: "The dancing plague of 1518 began in Strasbourg when Frau Troffea reportedly started dancing uncontrollably in the street. Others joined, and by August between 50 and 400 people were said to be affected. Some dancers collapsed.\n\nSources used section needed.",
-  },
-  {
-    title: "History of Minecraft",
-    author: "Aylan",
-    topic: "Games",
-    body: "Minecraft is a popular game released in 2011. The tab mentions early access, early players, rapid popularity, and awards.\n\nSources used section needed.",
-  },
-  {
-    title: "History of YessirPlayz",
-    author: "Wyatt Keller Mih, narrated by Derp",
-    topic: "Games",
-    body: "This article investigates the YouTuber YessirPlayz, a Roblox creator who started in 2020, grew during 2025 with frequent shorts, focused on Grow a Garden videos, then appeared to pause or vanish around April 2026. The article describes searching for old videos and trying to piece together the creator's history.\n\nSources used section needed.",
-  },
-  {
-    title: "Hobbit",
-    author: "Imported class article",
-    topic: "Books",
-    body: "The Hobbit is a book by J.R.R. Tolkien about Bilbo Baggins from Hobbiton. He goes on a journey involving the dragon Smaug.\n\nSources used section needed.",
-  },
-  {
-    title: "Paralysis Plague",
-    author: "Roshan Zieminski",
-    topic: "Science",
-    body: "This article describes a strange historical plague that supposedly causes long-term paralysis and a coma-like state before a brief final period of awareness. It needs sources and verification.\n\nSources used section needed.",
-  },
-  {
-    title: "Red Baron",
-    author: "Aylan Sisalem",
-    topic: "History",
-    body: "The Red Baron was a German World War I pilot credited with 80 aerial victories. The article describes his final dogfight in 1918, the debate over who shot him down, museum pieces from his plane, and the Red Baron in Snoopy comics.\n\nSources used section needed.",
-  },
-  {
     title: "Tritera",
     author: "Jonah Staub",
     topic: "Games",
@@ -258,12 +264,7 @@ const IMPORTED_ARTICLES = [
     topic: "History",
     body: "This tab begins with Pearl Harbor and the Doolittle Raid. It mentions planes sent to bomb Tokyo in 1942, some crews landing or crashing, one plane landing in Russia because of fuel, and the crews being honored.\n\nSources used section needed.",
   },
-  {
-    title: "Mythical Animals and Items",
-    author: "Alex",
-    topic: "Mythology",
-    body: "This page starts a topic about mythical animals and magic items. It mentions jade as a protective stone associated with luck and centaurs as half-human, half-horse beings who may be hunters, warriors, or wise figures.\n\nSources used section needed.",
-  },
+
 ];
 
 window.SCHOOL_WIKI_VERSION = SCHOOL_WIKI_VERSION;
