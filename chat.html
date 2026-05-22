@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Texting - The School Wiki</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="chat-login-screen" class="login-screen" aria-labelledby="chat-login-title">
+        <div class="login-panel">
+          <p class="eyebrow">Private class space</p>
+          <h1 id="chat-login-title">Texting</h1>
+          <p class="intro">Use the shared password to open the class texting page.</p>
+          <form id="chat-login-form" class="login-form">
+            <label for="chat-password">Shared password</label>
+            <div class="password-row">
+              <input id="chat-password" type="password" autocomplete="current-password" required />
+              <button type="submit">Enter</button>
+            </div>
+            <p id="chat-login-error" class="error" role="alert"></p>
+          </form>
+        </div>
+      </section>
+
+      <section id="texting-screen" class="wiki-screen hidden" aria-label="Texting page">
+        <header class="site-header">
+          <div>
+            <p class="eyebrow">The School Wiki</p>
+            <h1>Texting</h1>
+          </div>
+          <nav class="header-actions" aria-label="Site navigation">
+            <a class="nav-button" href="index.html">Wiki</a>
+            <button id="chat-lock-button" class="secondary-button" type="button">Lock</button>
+          </nav>
+        </header>
+
+        <section class="texting-layout">
+          <article class="texting-panel" aria-labelledby="messages-title">
+            <div class="panel-heading">
+              <h2 id="messages-title">Messages</h2>
+            </div>
+            <div id="messages-list" class="messages-list" aria-live="polite"></div>
+          </article>
+
+          <aside class="composer-panel texting-composer" aria-labelledby="message-form-title">
+            <h2 id="message-form-title">Send a text</h2>
+            <form id="message-form" class="stacked-form">
+              <label>
+                Your name
+                <input id="message-author" type="text" maxlength="40" required />
+              </label>
+              <label>
+                Message
+                <textarea id="message-body" rows="5" maxlength="500" required></textarea>
+              </label>
+              <button type="submit">Send</button>
+            </form>
+          </aside>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="dist/chat.js"></script>
+  </body>
+</html>
