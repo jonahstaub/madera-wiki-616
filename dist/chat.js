@@ -18,7 +18,6 @@ const chatPasswordInput = requiredChatElement("#chat-password");
 const chatAccountNameInput = requiredChatElement("#chat-account-name");
 const chatAccountEmailInput = requiredChatElement("#chat-account-email");
 const chatAccountPasswordInput = requiredChatElement("#chat-account-password");
-const chatGoogleLoginButton = requiredChatElement("#chat-google-login-button");
 const chatLoginError = requiredChatElement("#chat-login-error");
 const chatLockButton = requiredChatElement("#chat-lock-button");
 const chatAccountStatus = requiredChatElement("#chat-account-status");
@@ -203,26 +202,6 @@ chatLoginForm.addEventListener("submit", async (event) => {
     }
     catch (error) {
         chatLoginError.textContent = error instanceof Error ? error.message : "Could not log in.";
-    }
-});
-chatGoogleLoginButton.addEventListener("click", async () => {
-    if (!requireChatSharedPassword())
-        return;
-    if (!window.firebase || !chatAuthClient) {
-        chatLoginError.textContent = "Google sign-in is not available yet.";
-        return;
-    }
-    try {
-        const provider = new window.firebase.auth.GoogleAuthProvider();
-        const credential = await chatAuthClient.signInWithPopup(provider);
-        chatCurrentUser = credential.user;
-        localStorage.setItem(CHAT_STORAGE_KEYS.unlocked, "true");
-        chatPasswordInput.value = "";
-        chatLoginError.textContent = "";
-        showTexting();
-    }
-    catch (error) {
-        chatLoginError.textContent = error instanceof Error ? error.message : "Could not sign in with Google.";
     }
 });
 chatLockButton.addEventListener("click", async () => {

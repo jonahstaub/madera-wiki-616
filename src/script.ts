@@ -36,7 +36,6 @@ const passwordInput = requiredElement<HTMLInputElement>("#password");
 const accountNameInput = requiredElement<HTMLInputElement>("#account-name");
 const accountEmailInput = requiredElement<HTMLInputElement>("#account-email");
 const accountPasswordInput = requiredElement<HTMLInputElement>("#account-password");
-const googleLoginButton = requiredElement<HTMLButtonElement>("#google-login-button");
 const lockButton = requiredElement<HTMLButtonElement>("#lock-button");
 const rulesSection = requiredElement<HTMLElement>("#rules-section");
 const featuredSection = requiredElement<HTMLElement>("#featured-section");
@@ -571,27 +570,6 @@ loginForm.addEventListener("submit", async (event) => {
     showWiki();
   } catch (error) {
     loginError.textContent = error instanceof Error ? error.message : "Could not log in.";
-  }
-});
-
-googleLoginButton.addEventListener("click", async () => {
-  if (!requireSharedPassword()) return;
-
-  if (!window.firebase || !authClient) {
-    loginError.textContent = "Google sign-in is not available yet.";
-    return;
-  }
-
-  try {
-    const provider = new window.firebase.auth.GoogleAuthProvider();
-    const credential = await authClient.signInWithPopup(provider);
-    currentUser = credential.user;
-    localStorage.setItem(STORAGE_KEYS.unlocked, "true");
-    loginError.textContent = "";
-    passwordInput.value = "";
-    showWiki();
-  } catch (error) {
-    loginError.textContent = error instanceof Error ? error.message : "Could not sign in with Google.";
   }
 });
 
