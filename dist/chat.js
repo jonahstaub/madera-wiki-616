@@ -49,7 +49,10 @@ function requireChatSharedPassword() {
     if (chatPasswordInput.value.trim() === CHAT_PASSWORD) {
         return true;
     }
-    chatLoginError.textContent = "That password does not match.";
+    chatLoginError.textContent = chatPasswordInput.value.trim()
+        ? "The shared class password does not match."
+        : "Enter the shared class password first.";
+    chatPasswordInput.focus();
     return false;
 }
 function getMessages() {

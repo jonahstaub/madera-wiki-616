@@ -75,7 +75,10 @@ function requireSharedPassword() {
     if (passwordInput.value.trim() === PASSWORD) {
         return true;
     }
-    loginError.textContent = "That password does not match.";
+    loginError.textContent = passwordInput.value.trim()
+        ? "The shared class password does not match."
+        : "Enter the shared class password first.";
+    passwordInput.focus();
     return false;
 }
 function initializeSeedData() {
