@@ -33,8 +33,13 @@ interface Window {
 interface FirebaseCompatNamespace {
   apps: unknown[];
   initializeApp(config: Record<string, string>): unknown;
+  auth: FirebaseCompatAuthFactory;
   database(): FirebaseCompatDatabase;
-  auth(): FirebaseCompatAuth;
+}
+
+interface FirebaseCompatAuthFactory {
+  (): FirebaseCompatAuth;
+  GoogleAuthProvider: new () => FirebaseCompatAuthProvider;
 }
 
 interface FirebaseCompatDatabase {
@@ -55,9 +60,12 @@ interface FirebaseCompatAuth {
   currentUser: FirebaseCompatUser | null;
   createUserWithEmailAndPassword(email: string, password: string): Promise<FirebaseCompatUserCredential>;
   onAuthStateChanged(callback: (user: FirebaseCompatUser | null) => void): void;
+  signInWithPopup(provider: FirebaseCompatAuthProvider): Promise<FirebaseCompatUserCredential>;
   signInWithEmailAndPassword(email: string, password: string): Promise<FirebaseCompatUserCredential>;
   signOut(): Promise<void>;
 }
+
+interface FirebaseCompatAuthProvider {}
 
 interface FirebaseCompatUserCredential {
   user: FirebaseCompatUser | null;

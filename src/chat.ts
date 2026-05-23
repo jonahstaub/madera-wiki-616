@@ -21,6 +21,7 @@ const chatPasswordInput = requiredChatElement<HTMLInputElement>("#chat-password"
 const chatAccountNameInput = requiredChatElement<HTMLInputElement>("#chat-account-name");
 const chatAccountEmailInput = requiredChatElement<HTMLInputElement>("#chat-account-email");
 const chatAccountPasswordInput = requiredChatElement<HTMLInputElement>("#chat-account-password");
+const chatGoogleLoginButton = requiredChatElement<HTMLButtonElement>("#chat-google-login-button");
 const chatLoginError = requiredChatElement<HTMLElement>("#chat-login-error");
 const chatLockButton = requiredChatElement<HTMLButtonElement>("#chat-lock-button");
 const chatAccountStatus = requiredChatElement<HTMLElement>("#chat-account-status");
@@ -50,6 +51,15 @@ function getFirebaseAuth(): FirebaseCompatAuth | null {
   }
 
   return window.firebase.auth();
+}
+
+function requireChatSharedPassword(): boolean {
+  if (chatPasswordInput.value.trim() === CHAT_PASSWORD) {
+    return true;
+  }
+
+  chatLoginError.textContent = "That password does not match.";
+  return false;
 }
 
 function getMessages(): SchoolWikiMessage[] {
@@ -191,10 +201,7 @@ function renderMessages(): void {
 chatLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (chatPasswordInput.value.trim() !== CHAT_PASSWORD) {
-    chatLoginError.textContent = "That password does not match.";
-    return;
-  }
+  if (!requireChatSharedPassword()) return;
 
   const action = (event.submitter as HTMLButtonElement | null)?.dataset.action || "login";
   const email = chatAccountEmailInput.value.trim();
@@ -222,6 +229,27 @@ chatLoginForm.addEventListener("submit", async (event) => {
     showTexting();
   } catch (error) {
     chatLoginError.textContent = error instanceof Error ? error.message : "Could not log in.";
+  }
+});
+
+chatGoogleLoginButton.addEventListener("click", async () => {
+  if (!requireChatSharedPassword()) return;
+
+  if (!window.firebase || !chatAuthClient) {
+    chatLoginError.textContent = "Google sign-in is not available yet.";
+    return;
+  }
+
+  try {
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    const credential = await chatAuthClient.signInWithPopup(provider);
+    chatCurrentUser = credential.user;
+    localStorage.setItem(CHAT_STORAGE_KEYS.unlocked, "true");
+    chatPasswordInput.value = "";
+    chatLoginError.textContent = "";
+    showTexting();
+  } catch (error) {
+    chatLoginError.textContent = error instanceof Error ? error.message : "Could not sign in with Google.";
   }
 });
 

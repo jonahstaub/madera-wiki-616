@@ -25,6 +25,7 @@ const passwordInput = requiredElement("#password");
 const accountNameInput = requiredElement("#account-name");
 const accountEmailInput = requiredElement("#account-email");
 const accountPasswordInput = requiredElement("#account-password");
+const googleLoginButton = requiredElement("#google-login-button");
 const lockButton = requiredElement("#lock-button");
 const rulesSection = requiredElement("#rules-section");
 const featuredSection = requiredElement("#featured-section");
@@ -69,6 +70,13 @@ function getFirebaseAuth() {
         window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
     }
     return window.firebase.auth();
+}
+function requireSharedPassword() {
+    if (passwordInput.value.trim() === PASSWORD) {
+        return true;
+    }
+    loginError.textContent = "That password does not match.";
+    return false;
 }
 function initializeSeedData() {
     const existingVersion = localStorage.getItem(STORAGE_KEYS.seedVersion);
@@ -462,10 +470,8 @@ articlePhotoInput.addEventListener("change", async () => {
 });
 loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (passwordInput.value.trim() !== PASSWORD) {
-        loginError.textContent = "That password does not match.";
+    if (!requireSharedPassword())
         return;
-    }
     const action = event.submitter?.dataset.action || "login";
     const email = accountEmailInput.value.trim();
     const accountPassword = accountPasswordInput.value;
@@ -492,6 +498,26 @@ loginForm.addEventListener("submit", async (event) => {
     }
     catch (error) {
         loginError.textContent = error instanceof Error ? error.message : "Could not log in.";
+    }
+});
+googleLoginButton.addEventListener("click", async () => {
+    if (!requireSharedPassword())
+        return;
+    if (!window.firebase || !authClient) {
+        loginError.textContent = "Google sign-in is not available yet.";
+        return;
+    }
+    try {
+        const provider = new window.firebase.auth.GoogleAuthProvider();
+        const credential = await authClient.signInWithPopup(provider);
+        currentUser = credential.user;
+        localStorage.setItem(STORAGE_KEYS.unlocked, "true");
+        loginError.textContent = "";
+        passwordInput.value = "";
+        showWiki();
+    }
+    catch (error) {
+        loginError.textContent = error instanceof Error ? error.message : "Could not sign in with Google.";
     }
 });
 lockButton.addEventListener("click", async () => {
