@@ -15,13 +15,19 @@ const chatLoginScreen = requiredChatElement("#chat-login-screen");
 const textingScreen = requiredChatElement("#texting-screen");
 const chatLoginForm = requiredChatElement("#chat-login-form");
 const chatPasswordInput = requiredChatElement("#chat-password");
+const chatAccountNameInput = requiredChatElement("#chat-account-name");
+const chatAccountEmailInput = requiredChatElement("#chat-account-email");
+const chatAccountPasswordInput = requiredChatElement("#chat-account-password");
 const chatLoginError = requiredChatElement("#chat-login-error");
 const chatLockButton = requiredChatElement("#chat-lock-button");
+const chatAccountStatus = requiredChatElement("#chat-account-status");
 const messageForm = requiredChatElement("#message-form");
 const messagesList = requiredChatElement("#messages-list");
 const messageError = requiredChatElement("#message-error");
 const messageSyncRef = getFirebaseReference("schoolWiki/messages");
+const chatAuthClient = getFirebaseAuth();
 let applyingRemoteMessages = false;
+let chatCurrentUser = null;
 function getFirebaseReference(path) {
     if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG)
         return null;
@@ -29,6 +35,14 @@ function getFirebaseReference(path) {
         window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
     }
     return window.firebase.database().ref(path);
+}
+function getFirebaseAuth() {
+    if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG)
+        return null;
+    if (window.firebase.apps.length === 0) {
+        window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
+    }
+    return window.firebase.auth();
 }
 function getMessages() {
     const saved = localStorage.getItem(CHAT_STORAGE_KEYS.messages);
@@ -98,12 +112,37 @@ function formatChatDate() {
 function showTexting() {
     chatLoginScreen.classList.add("hidden");
     textingScreen.classList.remove("hidden");
+    chatAccountStatus.textContent = chatCurrentUser?.displayName || chatCurrentUser?.email || "Account";
+    const authorInput = requiredChatElement("#message-author");
+    if (!authorInput.value.trim() && chatCurrentUser?.displayName) {
+        authorInput.value = chatCurrentUser.displayName;
+    }
     renderMessages();
 }
 function showLogin() {
     textingScreen.classList.add("hidden");
     chatLoginScreen.classList.remove("hidden");
-    chatPasswordInput.focus();
+    chatAccountEmailInput.focus();
+}
+function initializeChatAccountState() {
+    if (!chatAuthClient) {
+        if (localStorage.getItem(CHAT_STORAGE_KEYS.unlocked) === "true") {
+            showTexting();
+        }
+        else {
+            showLogin();
+        }
+        return;
+    }
+    chatAuthClient.onAuthStateChanged((user) => {
+        chatCurrentUser = user;
+        if (user && localStorage.getItem(CHAT_STORAGE_KEYS.unlocked) === "true") {
+            showTexting();
+            return;
+        }
+        localStorage.removeItem(CHAT_STORAGE_KEYS.unlocked);
+        showLogin();
+    });
 }
 function renderMessages() {
     const messages = getMessages();
@@ -123,19 +162,45 @@ function renderMessages() {
     });
     messagesList.scrollTop = messagesList.scrollHeight;
 }
-chatLoginForm.addEventListener("submit", (event) => {
+chatLoginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (chatPasswordInput.value.trim() !== CHAT_PASSWORD) {
         chatLoginError.textContent = "That password does not match.";
         return;
     }
-    localStorage.setItem(CHAT_STORAGE_KEYS.unlocked, "true");
-    chatPasswordInput.value = "";
-    chatLoginError.textContent = "";
-    showTexting();
+    const action = event.submitter?.dataset.action || "login";
+    const email = chatAccountEmailInput.value.trim();
+    const accountPassword = chatAccountPasswordInput.value;
+    const name = chatAccountNameInput.value.trim();
+    try {
+        if (chatAuthClient) {
+            if (action === "signup") {
+                const credential = await chatAuthClient.createUserWithEmailAndPassword(email, accountPassword);
+                if (credential.user && name) {
+                    await credential.user.updateProfile({ displayName: name });
+                }
+                chatCurrentUser = credential.user;
+            }
+            else {
+                const credential = await chatAuthClient.signInWithEmailAndPassword(email, accountPassword);
+                chatCurrentUser = credential.user;
+            }
+        }
+        localStorage.setItem(CHAT_STORAGE_KEYS.unlocked, "true");
+        chatPasswordInput.value = "";
+        chatAccountPasswordInput.value = "";
+        chatLoginError.textContent = "";
+        showTexting();
+    }
+    catch (error) {
+        chatLoginError.textContent = error instanceof Error ? error.message : "Could not log in.";
+    }
 });
-chatLockButton.addEventListener("click", () => {
+chatLockButton.addEventListener("click", async () => {
     localStorage.removeItem(CHAT_STORAGE_KEYS.unlocked);
+    if (chatAuthClient) {
+        await chatAuthClient.signOut();
+    }
     showLogin();
 });
 messageForm.addEventListener("submit", (event) => {
@@ -157,9 +222,4 @@ messageForm.addEventListener("submit", (event) => {
     renderMessages();
 });
 initializeMessageSync();
-if (localStorage.getItem(CHAT_STORAGE_KEYS.unlocked) === "true") {
-    showTexting();
-}
-else {
-    showLogin();
-}
+initializeChatAccountState();

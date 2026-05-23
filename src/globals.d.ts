@@ -34,6 +34,7 @@ interface FirebaseCompatNamespace {
   apps: unknown[];
   initializeApp(config: Record<string, string>): unknown;
   database(): FirebaseCompatDatabase;
+  auth(): FirebaseCompatAuth;
 }
 
 interface FirebaseCompatDatabase {
@@ -48,4 +49,22 @@ interface FirebaseCompatReference {
 
 interface FirebaseCompatSnapshot {
   val(): unknown;
+}
+
+interface FirebaseCompatAuth {
+  currentUser: FirebaseCompatUser | null;
+  createUserWithEmailAndPassword(email: string, password: string): Promise<FirebaseCompatUserCredential>;
+  onAuthStateChanged(callback: (user: FirebaseCompatUser | null) => void): void;
+  signInWithEmailAndPassword(email: string, password: string): Promise<FirebaseCompatUserCredential>;
+  signOut(): Promise<void>;
+}
+
+interface FirebaseCompatUserCredential {
+  user: FirebaseCompatUser | null;
+}
+
+interface FirebaseCompatUser {
+  displayName: string | null;
+  email: string | null;
+  updateProfile(profile: { displayName?: string }): Promise<void>;
 }

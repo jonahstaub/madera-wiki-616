@@ -12,15 +12,20 @@
         <div class="login-panel">
           <p class="eyebrow">Private class space</p>
           <h1 id="login-title">The School Wiki</h1>
-          <p class="intro">
-            A private, Wikipedia-inspired space for grade articles, sources, and topic pages.
-          </p>
+          <p class="intro">Log in with your school wiki account and the shared class password.</p>
           <form id="login-form" class="login-form">
+            <label for="account-name">Name</label>
+            <input id="account-name" name="name" type="text" autocomplete="name" maxlength="40" />
+            <label for="account-email">Email</label>
+            <input id="account-email" name="email" type="email" autocomplete="email" required />
+            <label for="account-password">Account password</label>
+            <input id="account-password" name="account-password" type="password" autocomplete="current-password" required />
             <label for="password">Shared password</label>
             <div class="password-row">
-              <input id="password" name="password" type="password" autocomplete="current-password" required />
-              <button type="submit">Enter</button>
+              <input id="password" name="password" type="password" required />
+              <button type="submit" data-action="login">Log in</button>
             </div>
+            <button type="submit" class="secondary-button" data-action="signup">Create account</button>
             <p id="login-error" class="error" role="alert"></p>
           </form>
         </div>
@@ -38,6 +43,7 @@
               <button type="submit">Enter</button>
               <span id="admin-status" class="admin-status">Viewer</span>
             </form>
+            <span id="account-status" class="admin-status">Signed out</span>
             <a class="nav-button" href="chat.html">Texting</a>
             <button id="lock-button" class="secondary-button" type="button">Lock</button>
           </nav>
@@ -145,6 +151,7 @@
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="seed-data.js"></script>

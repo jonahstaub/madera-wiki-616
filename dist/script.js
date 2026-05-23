@@ -22,6 +22,9 @@ const wikiScreen = requiredElement("#wiki-screen");
 const loginForm = requiredElement("#login-form");
 const loginError = requiredElement("#login-error");
 const passwordInput = requiredElement("#password");
+const accountNameInput = requiredElement("#account-name");
+const accountEmailInput = requiredElement("#account-email");
+const accountPasswordInput = requiredElement("#account-password");
 const lockButton = requiredElement("#lock-button");
 const rulesSection = requiredElement("#rules-section");
 const featuredSection = requiredElement("#featured-section");
@@ -32,6 +35,7 @@ const cancelArticleButton = requiredElement("#cancel-article-button");
 const adminForm = requiredElement("#admin-form");
 const adminCodeInput = requiredElement("#admin-code");
 const adminStatus = requiredElement("#admin-status");
+const accountStatus = requiredElement("#account-status");
 const articleForm = requiredElement("#article-form");
 const articlesList = requiredElement("#articles-list");
 const articleSearchInput = requiredElement("#article-search");
@@ -46,7 +50,9 @@ const articleBodyInput = requiredElement("#article-body");
 let selectedPhoto = null;
 let currentSearch = "";
 let adminUnlocked = false;
+let currentUser = null;
 const articleSyncRef = getFirebaseReference("schoolWiki/articles");
+const authClient = getFirebaseAuth();
 let applyingRemoteArticles = false;
 function getFirebaseReference(path) {
     if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG)
@@ -55,6 +61,14 @@ function getFirebaseReference(path) {
         window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
     }
     return window.firebase.database().ref(path);
+}
+function getFirebaseAuth() {
+    if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG)
+        return null;
+    if (window.firebase.apps.length === 0) {
+        window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
+    }
+    return window.firebase.auth();
 }
 function initializeSeedData() {
     const existingVersion = localStorage.getItem(STORAGE_KEYS.seedVersion);
@@ -147,6 +161,7 @@ function escapeHtml(value) {
 function showWiki() {
     loginScreen.classList.add("hidden");
     wikiScreen.classList.remove("hidden");
+    accountStatus.textContent = currentUser?.displayName || currentUser?.email || "Account";
     showArticleHome();
     renderFeaturedTopics();
     renderArticles();
@@ -155,7 +170,27 @@ function showWiki() {
 function showLogin() {
     wikiScreen.classList.add("hidden");
     loginScreen.classList.remove("hidden");
-    passwordInput.focus();
+    accountEmailInput.focus();
+}
+function initializeAccountState() {
+    if (!authClient) {
+        if (localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
+            showWiki();
+        }
+        else {
+            showLogin();
+        }
+        return;
+    }
+    authClient.onAuthStateChanged((user) => {
+        currentUser = user;
+        if (user && localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
+            showWiki();
+            return;
+        }
+        localStorage.removeItem(STORAGE_KEYS.unlocked);
+        showLogin();
+    });
 }
 function showArticleHome() {
     rulesSection.classList.remove("hidden");
@@ -168,7 +203,11 @@ function showArticleCreatePage() {
     featuredSection.classList.add("hidden");
     articlesSection.classList.add("hidden");
     articleCreatePage.classList.remove("hidden");
-    requiredElement("#article-author").focus();
+    const authorInput = requiredElement("#article-author");
+    if (!authorInput.value.trim() && currentUser?.displayName) {
+        authorInput.value = currentUser.displayName;
+    }
+    authorInput.focus();
 }
 function formatDate() {
     return new Intl.DateTimeFormat("en", {
@@ -421,19 +460,45 @@ articlePhotoInput.addEventListener("change", async () => {
         articlePhotoInput.value = "";
     }
 });
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (passwordInput.value.trim() !== PASSWORD) {
         loginError.textContent = "That password does not match.";
         return;
     }
-    localStorage.setItem(STORAGE_KEYS.unlocked, "true");
-    loginError.textContent = "";
-    passwordInput.value = "";
-    showWiki();
+    const action = event.submitter?.dataset.action || "login";
+    const email = accountEmailInput.value.trim();
+    const accountPassword = accountPasswordInput.value;
+    const name = accountNameInput.value.trim();
+    try {
+        if (authClient) {
+            if (action === "signup") {
+                const credential = await authClient.createUserWithEmailAndPassword(email, accountPassword);
+                if (credential.user && name) {
+                    await credential.user.updateProfile({ displayName: name });
+                }
+                currentUser = credential.user;
+            }
+            else {
+                const credential = await authClient.signInWithEmailAndPassword(email, accountPassword);
+                currentUser = credential.user;
+            }
+        }
+        localStorage.setItem(STORAGE_KEYS.unlocked, "true");
+        loginError.textContent = "";
+        passwordInput.value = "";
+        accountPasswordInput.value = "";
+        showWiki();
+    }
+    catch (error) {
+        loginError.textContent = error instanceof Error ? error.message : "Could not log in.";
+    }
 });
-lockButton.addEventListener("click", () => {
+lockButton.addEventListener("click", async () => {
     localStorage.removeItem(STORAGE_KEYS.unlocked);
+    if (authClient) {
+        await authClient.signOut();
+    }
     showLogin();
 });
 makeArticleButton.addEventListener("click", () => {
@@ -571,9 +636,4 @@ articlesList.addEventListener("paste", (event) => {
 });
 initializeSeedData();
 initializeArticleSync();
-if (localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
-    showWiki();
-}
-else {
-    showLogin();
-}
+initializeAccountState();

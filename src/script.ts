@@ -33,6 +33,9 @@ const wikiScreen = requiredElement<HTMLElement>("#wiki-screen");
 const loginForm = requiredElement<HTMLFormElement>("#login-form");
 const loginError = requiredElement<HTMLElement>("#login-error");
 const passwordInput = requiredElement<HTMLInputElement>("#password");
+const accountNameInput = requiredElement<HTMLInputElement>("#account-name");
+const accountEmailInput = requiredElement<HTMLInputElement>("#account-email");
+const accountPasswordInput = requiredElement<HTMLInputElement>("#account-password");
 const lockButton = requiredElement<HTMLButtonElement>("#lock-button");
 const rulesSection = requiredElement<HTMLElement>("#rules-section");
 const featuredSection = requiredElement<HTMLElement>("#featured-section");
@@ -43,6 +46,7 @@ const cancelArticleButton = requiredElement<HTMLButtonElement>("#cancel-article-
 const adminForm = requiredElement<HTMLFormElement>("#admin-form");
 const adminCodeInput = requiredElement<HTMLInputElement>("#admin-code");
 const adminStatus = requiredElement<HTMLElement>("#admin-status");
+const accountStatus = requiredElement<HTMLElement>("#account-status");
 const articleForm = requiredElement<HTMLFormElement>("#article-form");
 const articlesList = requiredElement<HTMLElement>("#articles-list");
 const articleSearchInput = requiredElement<HTMLInputElement>("#article-search");
@@ -58,7 +62,9 @@ const articleBodyInput = requiredElement<HTMLTextAreaElement>("#article-body");
 let selectedPhoto: string | null = null;
 let currentSearch = "";
 let adminUnlocked = false;
+let currentUser: FirebaseCompatUser | null = null;
 const articleSyncRef = getFirebaseReference("schoolWiki/articles");
+const authClient = getFirebaseAuth();
 let applyingRemoteArticles = false;
 
 function getFirebaseReference(path: string): FirebaseCompatReference | null {
@@ -69,6 +75,16 @@ function getFirebaseReference(path: string): FirebaseCompatReference | null {
   }
 
   return window.firebase.database().ref(path);
+}
+
+function getFirebaseAuth(): FirebaseCompatAuth | null {
+  if (!window.firebase || !window.SCHOOL_WIKI_FIREBASE_CONFIG) return null;
+
+  if (window.firebase.apps.length === 0) {
+    window.firebase.initializeApp(window.SCHOOL_WIKI_FIREBASE_CONFIG);
+  }
+
+  return window.firebase.auth();
 }
 
 function initializeSeedData(): void {
@@ -175,6 +191,7 @@ function escapeHtml(value: string): string {
 function showWiki(): void {
   loginScreen.classList.add("hidden");
   wikiScreen.classList.remove("hidden");
+  accountStatus.textContent = currentUser?.displayName || currentUser?.email || "Account";
   showArticleHome();
   renderFeaturedTopics();
   renderArticles();
@@ -184,7 +201,30 @@ function showWiki(): void {
 function showLogin(): void {
   wikiScreen.classList.add("hidden");
   loginScreen.classList.remove("hidden");
-  passwordInput.focus();
+  accountEmailInput.focus();
+}
+
+function initializeAccountState(): void {
+  if (!authClient) {
+    if (localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
+      showWiki();
+    } else {
+      showLogin();
+    }
+    return;
+  }
+
+  authClient.onAuthStateChanged((user) => {
+    currentUser = user;
+
+    if (user && localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
+      showWiki();
+      return;
+    }
+
+    localStorage.removeItem(STORAGE_KEYS.unlocked);
+    showLogin();
+  });
 }
 
 function showArticleHome(): void {
@@ -199,7 +239,11 @@ function showArticleCreatePage(): void {
   featuredSection.classList.add("hidden");
   articlesSection.classList.add("hidden");
   articleCreatePage.classList.remove("hidden");
-  requiredElement<HTMLInputElement>("#article-author").focus();
+  const authorInput = requiredElement<HTMLInputElement>("#article-author");
+  if (!authorInput.value.trim() && currentUser?.displayName) {
+    authorInput.value = currentUser.displayName;
+  }
+  authorInput.focus();
 }
 
 function formatDate(): string {
@@ -483,7 +527,7 @@ articlePhotoInput.addEventListener("change", async () => {
   }
 });
 
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (passwordInput.value.trim() !== PASSWORD) {
@@ -491,14 +535,40 @@ loginForm.addEventListener("submit", (event) => {
     return;
   }
 
-  localStorage.setItem(STORAGE_KEYS.unlocked, "true");
-  loginError.textContent = "";
-  passwordInput.value = "";
-  showWiki();
+  const action = (event.submitter as HTMLButtonElement | null)?.dataset.action || "login";
+  const email = accountEmailInput.value.trim();
+  const accountPassword = accountPasswordInput.value;
+  const name = accountNameInput.value.trim();
+
+  try {
+    if (authClient) {
+      if (action === "signup") {
+        const credential = await authClient.createUserWithEmailAndPassword(email, accountPassword);
+        if (credential.user && name) {
+          await credential.user.updateProfile({ displayName: name });
+        }
+        currentUser = credential.user;
+      } else {
+        const credential = await authClient.signInWithEmailAndPassword(email, accountPassword);
+        currentUser = credential.user;
+      }
+    }
+
+    localStorage.setItem(STORAGE_KEYS.unlocked, "true");
+    loginError.textContent = "";
+    passwordInput.value = "";
+    accountPasswordInput.value = "";
+    showWiki();
+  } catch (error) {
+    loginError.textContent = error instanceof Error ? error.message : "Could not log in.";
+  }
 });
 
-lockButton.addEventListener("click", () => {
+lockButton.addEventListener("click", async () => {
   localStorage.removeItem(STORAGE_KEYS.unlocked);
+  if (authClient) {
+    await authClient.signOut();
+  }
   showLogin();
 });
 
@@ -653,11 +723,6 @@ articlesList.addEventListener("paste", (event) => {
 
 initializeSeedData();
 initializeArticleSync();
-
-if (localStorage.getItem(STORAGE_KEYS.unlocked) === "true") {
-  showWiki();
-} else {
-  showLogin();
-}
+initializeAccountState();
 
 export {};
